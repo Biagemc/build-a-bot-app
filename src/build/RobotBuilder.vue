@@ -1,35 +1,57 @@
 <template>
-  <div>
+  <div class="content">
+    <button class="add-to-cart" @click="addToCart()">Add to Cart></button>
     <div class="top-row">
       <div class="top part">
-        <img v-bind:src="avaiableParts.heads[0].src" title="head" />
-        <button class="prev-selector">&#9668;</button>
-        <button class="next-selector">&#9658;</button>
+        <div class="robot-name">
+          {{ selectedRobot.head.title }}
+          <span v-if="selectedRobot.head.onSale" class="sale">Sale!</span>
+        </div>
+        <img :src="selectedRobot.head.src" title="head" />
+        <button @click="selectNextHead()" class="prev-selector">&#9668;</button>
+        <button @click="selectPreviousHead()" class="next-selector">&#9658;</button>
       </div>
     </div>
     <div class="middle-row">
       <div class="left part">
-        <img v-bind:src="avaiableParts.arms[0].src" title="left arm" />
-        <button class="prev-selector">&#9650;</button>
-        <button class="next-selector">&#9660;</button>
+        <img :src="selectedRobot.leftArm.src" title="left arm" />
+        <button @click="selectNextLeftArm()" class="prev-selector">&#9650;</button>
+        <button @click="selectPreviousLeftArm()" class="next-selector">&#9660;</button>
       </div>
       <div class="center part">
-        <img v-bind:src="avaiableParts.torsos[0].src" title="left arm" />
-        <button class="prev-selector">&#9668;</button>
-        <button class="next-selector">&#9658;</button>
+        <img :src="selectedRobot.torso.src" title="left arm" />
+        <button @click="selectNextTorsos()" class="prev-selector">&#9668;</button>
+        <button @click="selectPreviousTorsos()" class="next-selector">&#9658;</button>
       </div>
       <div class="right part">
-        <img v-bind:src="avaiableParts.arms[0].src" title="left arm" />
-        <button class="prev-selector">&#9650;</button>
-        <button class="next-selector">&#9660;</button>
+        <img :src="selectedRobot.rightArm.src" title="left arm" />
+        <button @click="selectNextRightArm()" class="prev-selector">&#9650;</button>
+        <button @click="selectPreviousRightArm()" class="next-selector">&#9660;</button>
       </div>
     </div>
     <div class="bottom-row">
       <div class="bottom part">
-        <img v-bind:src="avaiableParts.bases[0].src" title="left arm" />
-        <button class="prev-selector">&#9668;</button>
-        <button class="next-selector">&#9658;</button>
+        <img :src="selectedRobot.base.src" title="left arm" />
+        <button @click="selectNextBases()" class="prev-selector">&#9668;</button>
+        <button @click="selectPreviousBases()" class="next-selector">&#9658;</button>
       </div>
+    </div>
+    <div>
+      <h1>Cart</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Robot</th>
+            <th class="cost">Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr :key="index" v-for="(robot, index) in cart">
+            <td>{{ robot.head.title }}</td>
+            <td>{{ robot.cost }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
@@ -37,12 +59,76 @@
 <script>
 import avaiableParts from "../data/parts";
 
+function getPreviousValidIndex(index, length) {
+  const deprecatedIndex = index - 1;
+  return deprecatedIndex < 0 ? length - 1 : deprecatedIndex;
+}
+
+function getNextValidIndex(index, length) {
+  const incrementedIndex = index + 1;
+  return incrementedIndex > length ? 0 : incrementedIndex;
+}
+
 export default {
   name: "RobotBuilder",
   data() {
     return {
+      cart: [],
       avaiableParts,
+      selectHeadIndex: 0,
+      selectLeftArmIndex: 0,
+      selectTorsosIndex: 0,
+      selectRightArmIndex: 0,
+      selectBasesIndex: 0,
     };
+  },
+  computed: {
+    selectedRobot() {
+      return {
+        head: avaiableParts.heads[this.selectHeadIndex],
+        leftArm: avaiableParts.arms[this.selectLeftArmIndex],
+        torso: avaiableParts.torsos[this.selectTorsosIndex],
+        rightArm: avaiableParts.arms[this.selectRightArmIndex],
+        base: avaiableParts.bases[this.selectBasesIndex],
+      };
+    },
+  },
+  methods: {
+    addToCart() {
+      const robot = this.selectedRobot;
+      const cost = robot.head.cost + robot.leftArm.cost + robot.torso.cost + robot.rightArm.cost + robot.base.cost;
+      this.cart.push(Object.assign({}, robot, { cost }));
+    },
+    selectNextHead() {
+      this.selectHeadIndex = getNextValidIndex(this.selectHeadIndex, avaiableParts.heads.length);
+    },
+    selectNextLeftArm() {
+      this.selectLeftArmIndex = getNextValidIndex(this.selectLeftArmIndex, avaiableParts.arms.length);
+    },
+    selectNextTorsos() {
+      this.selectTorsosIndex = getNextValidIndex(this.selectTorsosIndex, avaiableParts.torsos.length);
+    },
+    selectNextRightArm() {
+      this.selectRightArmIndex = getNextValidIndex(this.selectRightArmIndex, avaiableParts.arms.length);
+    },
+    selectNextBases() {
+      this.selectBasesIndex = getNextValidIndex(this.selectBasesIndex, avaiableParts.bases.length);
+    },
+    selectPreviousHead() {
+      this.selectHeadIndex = getPreviousValidIndex(this.selectHeadIndex, avaiableParts.heads.length);
+    },
+    selectPreviousLeftArm() {
+      this.selectLeftArmIndex = getPreviousValidIndex(this.selectLeftArmIndex, avaiableParts.arms.length);
+    },
+    selectPreviousTorsos() {
+      this.selectTorsosIndex = getPreviousValidIndex(this.selectTorsosIndex, avaiableParts.torsos.length);
+    },
+    selectPreviousRightArm() {
+      this.selectRightArmIndex = getPreviousValidIndex(this.selectRightArmIndex, avaiableParts.arms.length);
+    },
+    selectPreviousBases() {
+      this.selectBasesIndex = getPreviousValidIndex(this.selectBasesIndex, avaiableParts.bases.length);
+    },
   },
 };
 </script>
@@ -136,5 +222,35 @@ export default {
 }
 .right .next-selector {
   right: -3px;
+}
+
+.robot-name {
+  position: absolute;
+  top: -25px;
+  text-align: center;
+  width: 100%;
+}
+
+.content {
+  position: relative;
+}
+
+.add-to-cart {
+  position: relative;
+  right: 30px;
+  width: 220px;
+  padding: 3px;
+  font-size: 16px;
+}
+
+td,
+th {
+  text-align: left;
+  padding: 5px;
+  padding-right: 20px;
+}
+
+.cost {
+  text-align: right;
 }
 </style>
