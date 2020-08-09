@@ -59,10 +59,19 @@ import PartSelector from "./PartSelector.vue";
 
 export default {
   name: "RobotBuilder",
+  beforeRouteLeave(to, from, next) {
+    if (this.addedToCart) {
+      next(true);
+    } else {
+      const response = confirm("You have not added your robot to your cart, are you sure you want to leave?");
+      next(response);
+    }
+  },
   components: { PartSelector },
   data() {
     return {
       cart: [],
+      addedToCart: false,
       avaiableParts,
       selectedRobot: {
         head: {},
@@ -86,6 +95,7 @@ export default {
       const robot = this.selectedRobot;
       const cost = robot.head.cost + robot.leftArm.cost + robot.torso.cost + robot.rightArm.cost + robot.base.cost;
       this.cart.push(Object.assign({}, robot, { cost }));
+      this.addedToCart = true;
     },
   },
 };
