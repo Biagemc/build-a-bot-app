@@ -1,5 +1,5 @@
 <template>
-  <div class="content">
+  <div v-if="avaiableParts" class="content">
     <button class="add-to-cart" @click="addToCart()">Add to Cart></button>
     <div class="top-row">
       <!-- <div class="robot-name">
@@ -36,12 +36,14 @@
 </template>
 
 <script>
-import avaiableParts from "../data/parts";
 import createdHookMixin from "./created-hook-mixin";
 import PartSelector from "./PartSelector.vue";
 
 export default {
   name: "RobotBuilder",
+  created() {
+    this.$store.dispatch("getParts");
+  },
   beforeRouteLeave(to, from, next) {
     if (this.addedToCart) {
       next(true);
@@ -55,7 +57,6 @@ export default {
     return {
       cart: [],
       addedToCart: false,
-      avaiableParts,
       selectedRobot: {
         head: {},
         leftArm: {},
@@ -67,6 +68,9 @@ export default {
   },
   mixins: [createdHookMixin],
   computed: {
+    avaiableParts() {
+      return this.$store.state.robots.parts;
+    },
     headBorderStyle() {
       return {
         border: this.selectedRobot.head.onSale ? "3px solid red" : " 3px solid #aaa",
